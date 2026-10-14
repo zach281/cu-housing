@@ -1,0 +1,2 @@
+-- DEVELOPMENT-ONLY seed data. Applied by `supabase db reset` locally; never run in production.
+-- Fictional CU-area listings are added in Milestone 3, once browse exists to test them.
