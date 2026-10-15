@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { requestPasswordReset } from "../actions";
 import { initialFormState } from "@/lib/validation/auth";
-import { Field, FormMessage } from "@/components/ui/field";
+import { Field, FormFeedback, FormMessage } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 export default function ForgotPasswordPage() {
@@ -19,7 +19,6 @@ export default function ForgotPasswordPage() {
           <FormMessage status="success">{state.message}</FormMessage>
         ) : (
           <form action={action} className="space-y-5" noValidate>
-            {state.status === "error" && state.message && <FormMessage status="error">{state.message}</FormMessage>}
             <Field
               label="Email"
               name="email"
@@ -30,6 +29,7 @@ export default function ForgotPasswordPage() {
               defaultValue={state.values?.email}
               error={state.fieldErrors?.email}
             />
+            <FormFeedback state={state} />
             <SubmitButton pendingText="Sending…">Send reset link</SubmitButton>
           </form>
         )}

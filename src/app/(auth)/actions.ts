@@ -30,7 +30,10 @@ function authErrorMessage(error: AuthError): string {
     // once custom SMTP is configured.
     return "We couldn't send email to that address yet. The site's email service is still being set up.";
   }
-  return "Something went wrong on our side. Try again in a moment.";
+  // Logged to the server (visible in Vercel → Logs) and summarized for the user.
+  console.error("Supabase auth error", { code: error.code, status: error.status, message: error.message });
+  const ref = error.code ?? (error.status ? `status ${error.status}` : error.name);
+  return `Something went wrong on our side (${ref}). Try again in a moment.`;
 }
 
 export async function signUp(_prev: FormState, formData: FormData): Promise<FormState> {

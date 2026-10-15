@@ -53,3 +53,26 @@ export function FormMessage({ status, children }: { status: "error" | "success";
     </div>
   );
 }
+
+/**
+ * Result of a form submission, shown right above the submit button so it is
+ * on screen where the person just clicked. Field-level errors also get a
+ * pointer here, since the field itself may be scrolled out of view.
+ */
+export function FormFeedback({
+  state,
+}: {
+  state: { status: "idle" | "error" | "success"; message?: string; fieldErrors?: Partial<Record<string, string>> };
+}) {
+  if (state.status === "idle") return null;
+  if (state.message) return <FormMessage status={state.status}>{state.message}</FormMessage>;
+  const count = Object.values(state.fieldErrors ?? {}).filter(Boolean).length;
+  if (state.status === "error" && count > 0) {
+    return (
+      <FormMessage status="error">
+        {count === 1 ? "Fix the highlighted field above." : `Fix the ${count} highlighted fields above.`}
+      </FormMessage>
+    );
+  }
+  return null;
+}

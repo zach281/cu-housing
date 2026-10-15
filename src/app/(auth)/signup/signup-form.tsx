@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { signUp } from "../actions";
 import { initialFormState } from "@/lib/validation/auth";
-import { Field, FormMessage } from "@/components/ui/field";
+import { Field, FormFeedback, FormMessage } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { isUniversityEmail, site } from "@/lib/site";
 
@@ -28,8 +28,6 @@ export function SignUpForm() {
 
   return (
     <form action={action} className="space-y-5" noValidate>
-      {state.status === "error" && state.message && <FormMessage status="error">{state.message}</FormMessage>}
-
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-ink">I&apos;m here to</legend>
         <div className="grid grid-cols-2 gap-2">
@@ -88,6 +86,7 @@ export function SignUpForm() {
         hint="At least 8 characters, with letters and numbers."
       />
 
+      <FormFeedback state={state} />
       <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
     </form>
   );

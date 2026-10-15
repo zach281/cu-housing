@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signIn } from "../actions";
 import { initialFormState } from "@/lib/validation/auth";
-import { Field, FormMessage } from "@/components/ui/field";
+import { Field, FormFeedback } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 export function LoginForm({ next }: { next: string }) {
@@ -13,7 +13,6 @@ export function LoginForm({ next }: { next: string }) {
 
   return (
     <form action={action} className="space-y-5" noValidate>
-      {state.status === "error" && state.message && <FormMessage status="error">{state.message}</FormMessage>}
       <input type="hidden" name="next" value={next} />
 
       <Field
@@ -34,6 +33,7 @@ export function LoginForm({ next }: { next: string }) {
         </Link>
       </div>
 
+      <FormFeedback state={state} />
       <SubmitButton pendingText="Signing in…">Sign in</SubmitButton>
     </form>
   );

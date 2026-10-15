@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { updateProfile } from "./actions";
 import { initialFormState } from "@/lib/validation/auth";
-import { Field, FormMessage } from "@/components/ui/field";
+import { Field, FormFeedback } from "@/components/ui/field";
 import { buttonClass } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 
@@ -22,7 +22,6 @@ export function ProfileForm({ name, bio }: { name: string; bio: string }) {
 
   return (
     <form action={action} className="space-y-5" noValidate>
-      {state.status !== "idle" && state.message && <FormMessage status={state.status}>{state.message}</FormMessage>}
       <Field label="Name" name="name" autoComplete="name" required defaultValue={state.values?.name ?? name} error={fe.name} />
       <div className="space-y-1.5">
         <label htmlFor="bio" className="block text-sm font-semibold text-ink">
@@ -45,6 +44,7 @@ export function ProfileForm({ name, bio }: { name: string; bio: string }) {
           </p>
         )}
       </div>
+      <FormFeedback state={state} />
       <SaveButton />
     </form>
   );
