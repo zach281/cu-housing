@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { env } from "@/lib/env";
+import { getSiteUrl } from "@/lib/site-url";
 import { safeNextPath } from "@/lib/safe-redirect";
 import {
   fieldErrorsFrom,
@@ -46,7 +46,7 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     password,
     options: {
       data: { name, intended_role: intendedRole },
-      emailRedirectTo: `${env.siteUrl}/auth/confirm?next=/account`,
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/account`,
     },
   });
 
@@ -75,7 +75,7 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
       await supabase.auth.resend({
         type: "signup",
         email: parsed.data.email,
-        options: { emailRedirectTo: `${env.siteUrl}/auth/confirm?next=/account` },
+        options: { emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/account` },
       });
       return {
         status: "error",
@@ -101,7 +101,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${env.siteUrl}/auth/confirm?next=/account/update-password`,
+    redirectTo: `${getSiteUrl()}/auth/confirm?next=/account/update-password`,
   });
   if (error && error.status === 429) {
     return { status: "error", message: authErrorMessage(error), values };
