@@ -25,6 +25,11 @@ function authErrorMessage(error: AuthError): string {
   }
   if (error.code === "weak_password") return "Choose a stronger password: at least 8 characters with letters and numbers.";
   if (error.code === "signup_disabled") return "New sign-ups are paused right now.";
+  if (error.code === "email_address_not_authorized") {
+    // Supabase's built-in sender only emails project team members; goes away
+    // once custom SMTP is configured.
+    return "We couldn't send email to that address yet. The site's email service is still being set up.";
+  }
   return "Something went wrong on our side. Try again in a moment.";
 }
 
@@ -46,7 +51,7 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     password,
     options: {
       data: { name, intended_role: intendedRole },
-      emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/account`,
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm?flow=signup&next=/account`,
     },
   });
 
@@ -75,7 +80,7 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
       await supabase.auth.resend({
         type: "signup",
         email: parsed.data.email,
-        options: { emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/account` },
+        options: { emailRedirectTo: `${getSiteUrl()}/auth/confirm?flow=signup&next=/account` },
       });
       return {
         status: "error",
@@ -101,7 +106,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${getSiteUrl()}/auth/confirm?next=/account/update-password`,
+    redirectTo: `${getSiteUrl()}/auth/confirm?flow=recovery&next=/account/update-password`,
   });
   if (error && error.status === 429) {
     return { status: "error", message: authErrorMessage(error), values };

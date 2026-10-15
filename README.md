@@ -41,12 +41,14 @@ A housing marketplace for CU Boulder students: apartments, rooms, subleases, lea
    - Authentication → Sign In / Providers → Email: turn on **Confirm email**.
    - Authentication → URL Configuration: Site URL `http://localhost:3000`; add redirect URL `http://localhost:3000/**`
      (and your Vercel URL later).
-   - Authentication → Email Templates: paste the three templates from `supabase/templates/`
-     (Confirm signup, Reset password, Change email address). They send links to `/auth/confirm` with a token hash,
-     so a student can sign up on a laptop and confirm from their phone.
+   - **Email templates are optional.** The app works with Supabase's default templates. The custom ones in
+     `supabase/templates/` let people confirm on a different device than they signed up on; Supabase only
+     lets you edit templates once custom SMTP is set up (below).
    - Authentication → Policies (password): minimum 8 characters, letters and digits.
-   - Supabase's built-in email sender is rate-limited to a few emails per hour. Before launch, add custom SMTP
-     (Resend, Postmark, etc.) under Authentication → Emails → SMTP Settings.
+   - **Custom SMTP is required before launch.** Without it, Supabase only emails members of your Supabase
+     organization (anyone else gets "Email address not authorized"), sends a few emails per hour, and locks the
+     templates. Add a sender such as Resend or Postmark under Authentication → Emails → SMTP Settings. This needs
+     a domain you own. Until then, invite any address you want to test with to your Supabase organization.
 
 5. **Run it**
    ```bash

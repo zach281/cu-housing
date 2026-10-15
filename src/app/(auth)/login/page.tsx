@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "./login-form";
+import { FormMessage } from "@/components/ui/field";
 import { safeNextPath } from "@/lib/safe-redirect";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -19,14 +20,23 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
       <div className="mt-8">
         {/* searchParams is request data, so it resolves behind a boundary. */}
         <Suspense fallback={<LoginForm next="/account" />}>
-          <LoginFormWithNext searchParams={searchParams} />
+          <LoginFormWithParams searchParams={searchParams} />
         </Suspense>
       </div>
     </>
   );
 }
 
-async function LoginFormWithNext({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
-  const { next } = await searchParams;
-  return <LoginForm next={safeNextPath(next)} />;
+async function LoginFormWithParams({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
+  const { next, confirmed } = await searchParams;
+  return (
+    <>
+      {confirmed === "1" && (
+        <div className="mb-5">
+          <FormMessage status="success">Your email is confirmed. Sign in to continue.</FormMessage>
+        </div>
+      )}
+      <LoginForm next={safeNextPath(next)} />
+    </>
+  );
 }
