@@ -467,6 +467,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       is_admin: { Args: never; Returns: boolean };
+      ensure_my_profile: { Args: never; Returns: Database["public"]["Tables"]["profiles"]["Row"] | null };
       is_active_user: { Args: never; Returns: boolean };
       is_conversation_participant: { Args: { conv_id: string }; Returns: boolean };
       track_event: { Args: { p_event_name: string; p_listing_id?: string; p_properties?: Json }; Returns: undefined };

@@ -30,6 +30,14 @@ async function ExplanationFromParams({ searchParams }: { searchParams: PageProps
 }
 
 function Explanation({ reason }: { reason: string | undefined }) {
+  if (reason === "profile") {
+    return (
+      <p className="mt-3 text-granite">
+        You&apos;re signed in, but your account&apos;s profile couldn&apos;t be loaded. This happens when an account was
+        created before the site&apos;s database was fully set up. Contact the site admin to repair it.
+      </p>
+    );
+  }
   if (reason === "device") {
     return (
       <p className="mt-3 text-granite">

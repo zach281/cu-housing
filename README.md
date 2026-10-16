@@ -36,6 +36,8 @@ A housing marketplace for CU Boulder students: apartments, rooms, subleases, lea
    npx supabase link --project-ref <your-project-ref>
    npx supabase db push
    ```
+   No terminal? Paste each file in `supabase/migrations/` into the Supabase SQL Editor and run them **in
+   filename order**. Every file is safe to run once; later files assume the earlier ones have run.
 
 4. **Configure Auth in the Supabase dashboard** (the CLI config only applies to local dev):
    - Authentication → Sign In / Providers → Email: turn on **Confirm email**.

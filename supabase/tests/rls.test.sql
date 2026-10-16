@@ -103,6 +103,35 @@ select tests.ok('account_created event recorded per signup',
 select tests.ok('profiles never store email',
   not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name like '%email%'));
 
+-- Accounts that predate the profile trigger can repair themselves (and only themselves)
+insert into auth.users (id, email, email_confirmed_at, raw_user_meta_data) values
+  ('00000000-0000-0000-0000-0000000000f1', 'early@colorado.edu', now(), '{"name":"Early Bird","intended_role":"provider"}'),
+  ('00000000-0000-0000-0000-0000000000f2', 'other@gmail.com', now(), '{}');
+delete from public.profiles where id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f2');
+select tests.login('00000000-0000-0000-0000-0000000000f1');
+select tests.ok('ensure_my_profile returns the rebuilt profile',
+  (select (public.ensure_my_profile()).name = 'Early Bird'));
+reset role;
+select tests.ok('ensure_my_profile rebuilds a missing profile from auth data',
+  (select name = 'Early Bird' and role = 'provider' and verification_status = 'cu_verified'
+   from public.profiles where id = '00000000-0000-0000-0000-0000000000f1'));
+select tests.ok('ensure_my_profile does not touch other accounts',
+  not exists (select 1 from public.profiles where id = '00000000-0000-0000-0000-0000000000f2'));
+select tests.login('00000000-0000-0000-0000-0000000000f1');
+select public.ensure_my_profile();
+reset role;
+select tests.ok('ensure_my_profile is idempotent',
+  (select count(*) = 1 from public.profiles where id = '00000000-0000-0000-0000-0000000000f1'));
+select tests.logout();
+select tests.throws('anon cannot call ensure_my_profile', $$select public.ensure_my_profile()$$, array['42501']);
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.throws('users cannot build profiles for arbitrary ids',
+  $$select public.create_profile_for_auth_user('00000000-0000-0000-0000-0000000000f2')$$, array['42501']);
+reset role;
+select set_config('request.jwt.claims', '', true);
+delete from auth.users where id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f2');
+delete from public.analytics_events where user_id is null and event_name = 'account_created';
+
 -- As alice
 select tests.login('00000000-0000-0000-0000-00000000000a');
 select tests.affects('user updates own name/bio',
