@@ -91,7 +91,7 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
         values,
       };
     }
-    if (error.code === "invalid_credentials" || error.status === 400) {
+    if (error.code === "invalid_credentials") {
       return { status: "error", message: "That email and password don't match an account.", values };
     }
     return { status: "error", message: authErrorMessage(error), values };
