@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signUp } from "../actions";
 import { initialFormState } from "@/lib/validation/auth";
 import { Field, FormFeedback, FormMessage } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { buttonClass } from "@/components/ui/button";
 import { isUniversityEmail, site } from "@/lib/site";
 
 export function SignUpForm() {
@@ -19,6 +21,10 @@ export function SignUpForm() {
         <p className="text-sm text-granite">
           The link expires in an hour. Can&apos;t find it? Check spam, or sign in and we&apos;ll send a new one.
         </p>
+        <p className="text-sm text-granite">Confirmed on another device? Sign in here to continue.</p>
+        <Link href="/login" className={buttonClass({ variant: "secondary", className: "w-full" })}>
+          Sign in
+        </Link>
       </div>
     );
   }
