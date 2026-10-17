@@ -66,7 +66,7 @@ export function FormFeedback({
 }) {
   if (state.status === "idle") return null;
   if (state.message) return <FormMessage status={state.status}>{state.message}</FormMessage>;
-  const count = Object.values(state.fieldErrors ?? {}).filter(Boolean).length;
+  const count = new Set(Object.values(state.fieldErrors ?? {}).filter(Boolean)).size;
   if (state.status === "error" && count > 0) {
     return (
       <FormMessage status="error">

@@ -34,14 +34,8 @@ export const updatePasswordSchema = z
   .object({ password: passwordSchema, confirm: z.string() })
   .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "Passwords don't match." });
 
-export type FormState = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  fieldErrors?: Partial<Record<string, string>>;
-  values?: Record<string, string>;
-};
-
-export const initialFormState: FormState = { status: "idle" };
+export type { FormState } from "./form-state";
+export { initialFormState } from "./form-state";
 
 export function fieldErrorsFrom(error: z.ZodError): Partial<Record<string, string>> {
   const out: Partial<Record<string, string>> = {};

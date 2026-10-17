@@ -10,8 +10,8 @@ A housing marketplace for CU Boulder students: apartments, rooms, subleases, lea
 | Milestone | Scope | Status |
 |---|---|---|
 | 1 | Project setup, database, authentication | Done |
-| 2 | Listing creation | Next |
-| 3 | Browse, search, filters | |
+| 2 | Listing creation | Done |
+| 3 | Browse, search, filters | Next |
 | 4 | Listing details, favorites | |
 | 5 | Messaging | |
 | 6 | Profiles, roommate matching | |
@@ -77,6 +77,18 @@ npm run build      # production build (needs the env vars set)
 TEST_DATABASE_URL=postgres://postgres@localhost:5432/postgres npm run test:db
 ```
 
+### End-to-end tests (real browser, local Supabase-like stack)
+
+```bash
+cd e2e && npm install && cd ..
+bash e2e/up.sh                 # Postgres + Supabase Auth + PostgREST + storage emulation + the app on :3100
+cd e2e && npm test             # Playwright tests in e2e/tests
+```
+
+`e2e/up.sh` downloads the official Supabase Auth and PostgREST binaries, runs every migration, and starts
+the app against them, so sign-up emails, Row Level Security and storage permissions behave as in production.
+Linux only; it needs a disposable local Postgres (it creates one under `/var/tmp/pgtest` if missing).
+
 `test:db` applies every migration to a throwaway database on any Postgres 15+ server, then runs
 `supabase/tests/rls.test.sql`: about 100 assertions covering what each role can and can't read or write.
 It drops and recreates a database named `cu_housing_test`. Never point it at production.
@@ -97,6 +109,10 @@ src/
     supabase/              Browser, server and proxy clients; generated types
     validation/            Zod schemas shared by forms and server actions
     site.ts                Brand name and campus constants
+    listings/              Listing constants, data access, address lookup, photo helpers
+    validation/listing.ts  Rules for every listing field (shared by forms and server actions)
+  app/listings/new/        Step 1 of a new listing
+  app/dashboard/listings/  My listings, the step-by-step editor, and listing server actions
 supabase/
   migrations/              Schema, RLS policies, storage buckets
   templates/               Auth email templates
@@ -112,4 +128,8 @@ supabase/
   removes it. **Provider verification** is a manual admin step. Badges describe what was checked; they never
   claim a listing is safe.
 - Analytics events are written only through `track_event()`, which stamps the caller's identity.
+- Listings: at most 15 photos each and 10 new listings per user per day (admins exempt), enforced in the
+  database. Photos are resized in the browser before upload, which also strips GPS data from phone photos.
+- Addresses are looked up with the free U.S. Census geocoder (no account); posters can drag the map pin.
+  Map tiles come from OpenStreetMap.
 - No payments are processed.

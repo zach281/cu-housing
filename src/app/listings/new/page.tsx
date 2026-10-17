@@ -1,27 +1,45 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
+import { FormMessage } from "@/components/ui/field";
+import { createListing } from "@/app/dashboard/listings/actions";
+import { StepNav } from "@/app/dashboard/listings/[id]/edit/step-nav";
+import { BasicsForm } from "@/app/dashboard/listings/[id]/edit/steps/basics-form";
 
 export const metadata: Metadata = { title: "List a property" };
 
-// Replaced by the multi-step listing form in Milestone 2. Already requires
-// sign-in, so the auth gate can be tested now.
 export default function NewListingPage() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <h1 className="text-3xl font-bold tracking-tight text-ink">List a property</h1>
-      <Suspense fallback={null}>
-        <Gate />
+    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-ink sm:text-3xl">List a property</h1>
+      <Suspense fallback={<p className="text-granite">Loading…</p>}>
+        <NewListing />
       </Suspense>
     </div>
   );
 }
 
-async function Gate() {
+async function NewListing() {
   const user = await requireUser("/listings/new");
+
+  if (user.profile.account_status === "suspended") {
+    return (
+      <FormMessage status="error">
+        Your account is suspended, so you can&apos;t post listings. Contact the site team if you think this is a mistake.
+      </FormMessage>
+    );
+  }
+
   return (
-    <p className="mt-3 max-w-prose text-granite">
-      You&apos;re signed in as {user.profile.name || user.email}. The listing form is the next thing being built.
-    </p>
+    <>
+      <StepNav listingId={null} current="basics" progress={[]} />
+      <section className="mt-8">
+        <h2 className="text-xl font-bold text-ink">Basics</h2>
+        <p className="mt-1 mb-6 text-granite">
+          What kind of place it is. You can save a draft at any step and finish later.
+        </p>
+        <BasicsForm action={createListing} defaults={{}} backHref={null} />
+      </section>
+    </>
   );
 }
