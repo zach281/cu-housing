@@ -245,6 +245,54 @@ select tests.throws('suspended users cannot upload',
 select tests.logout();
 select tests.ok('anon sees images of active listings', (select count(*) = 1 from public.listing_images));
 
+-- Storage: owners can read and delete their own files (Supabase needs SELECT to delete)
+select tests.login('00000000-0000-0000-0000-00000000000b');
+select tests.affects('owner uploads a second file',
+  $$insert into storage.objects (bucket_id, name) values ('listing-images', '00000000-0000-0000-0000-00000000000b/10000000-0000-0000-0000-000000000001/b.jpg')$$, 1);
+select tests.ok('owner can read own storage objects',
+  (select count(*) = 2 from storage.objects where name like '00000000-0000-0000-0000-00000000000b/%'));
+select tests.affects('owner deletes own file (delete … returning needs select)',
+  $$delete from storage.objects where name = '00000000-0000-0000-0000-00000000000b/10000000-0000-0000-0000-000000000001/b.jpg' returning name$$, 1);
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.ok('users cannot list other users'' storage objects',
+  (select count(*) = 0 from storage.objects where name like '00000000-0000-0000-0000-00000000000b/%'));
+
+-- At most 15 photos per listing
+select tests.login('00000000-0000-0000-0000-00000000000b');
+do $$ begin
+  for i in 2..15 loop
+    insert into public.listing_images (listing_id, storage_path, display_order)
+    values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b/10000000-0000-0000-0000-000000000001/p' || i || '.jpg', i - 1);
+  end loop;
+end $$;
+select tests.ok('15 photos allowed', (select count(*) = 15 from public.listing_images where listing_id = '10000000-0000-0000-0000-000000000001'));
+select tests.throws('16th photo rejected',
+  $$insert into public.listing_images (listing_id, storage_path) values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b/10000000-0000-0000-0000-000000000001/p16.jpg')$$, array['23514']);
+select tests.affects('owner removes photos',
+  $$delete from public.listing_images where storage_path like '%/p%.jpg'$$, 14);
+
+-- At most 10 new listings per user per day (admins exempt)
+do $$ begin
+  for i in 1..8 loop
+    insert into public.listings (owner_id, title) values ('00000000-0000-0000-0000-00000000000b', 'Rate limit draft ' || i);
+  end loop;
+end $$;
+select tests.ok('10 listings in a day allowed',
+  (select count(*) = 10 from public.listings where owner_id = '00000000-0000-0000-0000-00000000000b'));
+select tests.throws('11th listing in a day rejected',
+  $$insert into public.listings (owner_id, title) values ('00000000-0000-0000-0000-00000000000b', 'One too many')$$, array['PT429']);
+select tests.affects('clean up rate limit drafts',
+  $$delete from public.listings where title like 'Rate limit draft %'$$, 8);
+select tests.login('00000000-0000-0000-0000-00000000000d');
+do $$ begin
+  for i in 1..11 loop
+    insert into public.listings (owner_id, title) values ('00000000-0000-0000-0000-00000000000d', 'Admin draft ' || i);
+  end loop;
+end $$;
+select tests.ok('admins are exempt from the posting limit',
+  (select count(*) = 11 from public.listings where owner_id = '00000000-0000-0000-0000-00000000000d'));
+delete from public.listings where title like 'Admin draft %';
+
 -- ===========================================================================
 -- Favorites
 -- ===========================================================================

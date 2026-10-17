@@ -43,8 +43,13 @@ async function UserNav() {
 
   const firstName = user.profile.name.split(" ")[0] || "Account";
   return (
-    <Link href="/account" className="rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-pine-wash">
-      {firstName}
-    </Link>
+    <div className="flex items-center gap-1 sm:gap-2">
+      <Link href="/dashboard/listings" className="rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-pine-wash">
+        My listings
+      </Link>
+      <Link href="/account" className="rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-pine-wash">
+        {firstName}
+      </Link>
+    </div>
   );
 }
