@@ -21,6 +21,7 @@ if ! pg_isready -q -h 127.0.0.1 -p "$PG_PORT"; then
 fi
 
 ADMIN_DATABASE_URL="postgres://postgres@127.0.0.1:$PG_PORT/postgres?sslmode=disable" bash e2e/stack/start.sh
+node e2e/seed-photos.mjs
 
 # App, built against the local stack
 export NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321

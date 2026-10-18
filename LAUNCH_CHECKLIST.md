@@ -17,6 +17,13 @@ Costs checked October 2026.
       bandwidth instead of 5 GB, and the project never pauses.
 - [ ] **Bot protection (Cloudflare Turnstile, free).** Stops scripts from mass-creating accounts.
       Supabase → Authentication → Bot and Abuse Protection.
+- [ ] **Remove the demo listings** if you added them: run `supabase/demo/remove-demo-listings.sql` in the
+      Supabase SQL Editor. Fake listings on a live site would mislead real students.
+- [ ] **Map tiles.** Maps use OpenStreetMap's free tile servers, which are fine for testing and light use but
+      not meant for a busy public site. Before promoting the site widely, switch to a tile provider with a free
+      tier (MapTiler, Stadia Maps, or Mapbox). It's a one-line change in two files.
+- [ ] **Match Vercel's server region to Supabase's** (Vercel → Settings → Functions → Region) so every page
+      load doesn't cross the country. Check your Supabase region under Project Settings → General.
 - [ ] **Delete the old `cu-housing` Vercel project** (the one without `-9c7p`) if it still exists.
 - [ ] **Review the Terms of Use and Privacy Policy** pages (to be drafted in Milestone 8). Have a lawyer
       look before charging money.

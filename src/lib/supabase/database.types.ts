@@ -162,6 +162,8 @@ export type Database = {
           latitude: number | null;
           longitude: number | null;
           distance_from_campus_mi: number | null;
+          approx_latitude: number | null;
+          approx_longitude: number | null;
           furnished: boolean;
           parking: boolean;
           pets_allowed: boolean;

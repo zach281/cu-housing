@@ -65,3 +65,8 @@ create function storage.foldername(name text) returns text[] language sql immuta
   select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1]
 $$;
 grant execute on function storage.foldername(text) to anon, authenticated, service_role;
+
+-- Supabase installs extensions like pgcrypto in an "extensions" schema.
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+grant usage on schema extensions to anon, authenticated, service_role;

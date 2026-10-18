@@ -204,6 +204,22 @@ select tests.affects('another draft stays private',
 select tests.logout();
 select tests.ok('anon sees active listings only',
   (select array_agg(id::text) = array['10000000-0000-0000-0000-000000000001'] from public.listings));
+select tests.throws('anon cannot read the street address', $$select address from public.listings$$, array['42501']);
+select tests.throws('anon cannot read exact coordinates', $$select latitude, longitude from public.listings$$, array['42501']);
+select tests.throws('anon cannot select every column', $$select * from public.listings$$, array['42501']);
+select tests.throws('anon cannot read moderation notes', $$select removal_reason from public.listings$$, array['42501']);
+select tests.ok('anon gets approximate coordinates and distance',
+  (select approx_latitude is not null and approx_longitude is not null and distance_from_campus_mi is not null from public.listings));
+select tests.ok('anon can full-text search',
+  (select count(*) = 1 from public.listings where search_vector @@ websearch_to_tsquery('english', 'hill')));
+reset role;
+select tests.ok('approximate location is within ~250 m of the real one, but not exact',
+  (select abs(approx_latitude - latitude) <= 0.00125 and abs(approx_longitude - longitude) <= 0.00125
+          and (approx_latitude, approx_longitude) is distinct from (latitude, longitude)
+   from public.listings where id = '10000000-0000-0000-0000-000000000001'));
+select tests.ok('street address is not searchable',
+  (select not (search_vector @@ websearch_to_tsquery('english', 'college')) from public.listings where id = '10000000-0000-0000-0000-000000000001'));
+select tests.logout();
 select tests.throws('anon cannot create listings',
   $$insert into public.listings (owner_id, title) values ('00000000-0000-0000-0000-00000000000b', 'anon listing')$$, array['42501']);
 
